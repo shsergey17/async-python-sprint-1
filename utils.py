@@ -1,3 +1,6 @@
+
+import logging
+
 CITIES = {
     "MOSCOW": "https://code.s3.yandex.net/async-module/moscow-response.json",
     "PARIS": "https://code.s3.yandex.net/async-module/paris-response.json",
@@ -20,6 +23,16 @@ ERR_MESSAGE_TEMPLATE = "Something wrong. Please contact with mentor."
 MIN_MAJOR_PYTHON_VER = 3
 MIN_MINOR_PYTHON_VER = 9
 
+HOUR_FROM = 9
+HOUR_TO = 19
+WEATHER_CONDITION = ['clear', 'partly', 'cloudy', 'overcast']
+
+logging.basicConfig(
+    filename="forecasting.log",
+    format="%(asctime)s::%(levelname)s::%(message)s",
+    level="DEBUG",
+)
+logger = logging.getLogger()
 
 def check_python_version():
     import sys
