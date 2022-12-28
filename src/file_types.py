@@ -1,34 +1,83 @@
 from typing import List
 from pathlib import Path
-import csv
+import csv, json
+import openpyxl
 from abc import ABC, abstractmethod
 from src.entity import CityData
 
-# Формат сохраняемого файла - json, csv или xls/xlsx.
+"""
+Форматы сохраняемого файла - json, csv или xls/xlsx.
+"""
+
 
 class IFileType(ABC):
-    def __init__(self, filename: Path) -> None:
+    """
+    Интерфейс для форматов файлов
+    """
+    def __init__(self, filename: str, ext: str = None) -> None:
+        """
+        Params:
+        filename (str): имя файла
+        ext (str): принудительно переопределяемое расширение для файла
+        """
         self.filename = filename
-    
+        self.force_ext = ext
+
     @abstractmethod
-    def save(self, filename: str, data: List[CityData]):
+    def save(self, filename: str, data: List[List[str]]):
+        """
+        Сохранение данных в файл
+        Метод необходимо переопределить
+
+        Params:
+        filename (str): имя файла
+        data (List[CityData]): данные
+
+        Raises:
+        NotImplementedError: Если метод не реализован в подклассе
+        """
         raise NotImplementedError()
 
-class JsonFileType(IFileType):
+    def get_filename_with_ext(self, ext: str) -> str:
+        return f'{self.filename}.{ext}'
 
-    def save(self, data: List[CityData]):
-        pass
+class JsonFileType(IFileType):
+    """
+    Сохранение данных в формате json
+    """
+    ext = 'json'
+    def save(self, data: List[List[str]]):
+        json_data = json.dumps(data, ensure_ascii=False)
+
+        filename = self.get_filename_with_ext(self.force_ext or self.ext)
+        with open(filename, 'w') as file:
+            file.write(json_data)
 
 class CsvFileType(IFileType):
+    """
+    Сохранение данных в формате csv
+    """
+    ext = 'csv'
 
-    # Path("data.csv")
     def save(self, data: List[List[str]]):
-        with open(self.filename, 'w', newline='') as csvfile:
+
+        filename = self.get_filename_with_ext(self.force_ext or self.ext)
+        with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             for row in data:
                 writer.writerow(row)
 
 class XlsxFileType(IFileType):
+    """
+    Сохранение данных в формате xlsx
+    """
+    ext = 'xlsx'
 
-    def save(self, data: List[CityData]):
-        pass
+    def save(self, data: List[List[str]], ext: str = None):
+        filename = self.get_filename_with_ext(self.force_ext or self.ext)
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        for row in data:
+            sheet.append(row)
+        wb.save(filename)
+    __slots__ = ['MY_CONSTANT']
