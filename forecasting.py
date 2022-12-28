@@ -68,7 +68,7 @@ def forecast_weather(file: IFileType):
 if __name__ == "__main__":
     """ JsonFileType, CsvFileType, XlsxFileType"""
 
-    file = XlsxFileType(filename = 'city')
+    file = CsvFileType(filename = 'city')
     forecast_weather(file)
 
     # import resource
