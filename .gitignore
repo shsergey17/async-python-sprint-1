@@ -4,3 +4,5 @@ creds.ini
 __pycache__/
 *.pyc
 .vscode
+*.log
+*.csv

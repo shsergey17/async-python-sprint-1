@@ -6,11 +6,10 @@ from typing import List, Tuple, Type
 from pathlib import Path
 from src.entity import CityData, DateInfo
 from src.file_types import IFileType
-import json
 from utils import HOUR_FROM, HOUR_TO, WEATHER_CONDITION, logger
 
-class DataFetchingTask:
 
+class DataFetchingTask:
     @staticmethod
     def make_request(city_name: str) -> list:
         """
@@ -29,8 +28,10 @@ class DataFetchingTask:
         return resp
 
 
-class DataCalculationTask():
-    def __init__(self, hour_from: int, hour_to: int, weather_condition: list[str]) -> None:
+class DataCalculationTask:
+    def __init__(
+        self, hour_from: int, hour_to: int, weather_condition: list[str]
+    ) -> None:
         """
         Params:
         hour_from (int): начальный час для расчетов.
@@ -42,7 +43,7 @@ class DataCalculationTask():
         self.hour_to = hour_to
         self.weather_condition = weather_condition
 
-    def calc(self, city_name, data) -> CityData:
+    def calc(self, city_name: str, data: list) -> CityData:
         """
         Вычисляет среднюю температуру и среднее сумма часов без осадков для города
 
@@ -59,21 +60,22 @@ class DataCalculationTask():
 
         logger.debug("Date list: %s", date_info_list)
 
-        avg_temp = self.average(date_info_list, 'avg_temperature')
-        avg_condition = self.average(date_info_list, 'sum_condition')
+        avg_temp = self.average(date_info_list, "avg_temperature")
+        avg_condition = self.average(date_info_list, "sum_condition")
 
         logger.debug("Average temperature: %s", avg_temp)
         logger.debug("Average condition: %s", avg_condition)
 
         return CityData(
-            city_name = city_name,
-            dates = date_info_list,
-            average_temp = avg_temp,
-            average_condition = avg_condition
+            city_name=city_name,
+            dates=date_info_list,
+            average_temp=avg_temp,
+            average_condition=avg_condition,
         )
 
     def avg(self, value, length: int) -> float:
-        if length == 0: return 0
+        if length == 0:
+            return 0
         return round(value / length, 1)
 
     def average(self, data: List[DateInfo], field: str) -> float:
@@ -99,11 +101,10 @@ class DataCalculationTask():
         for date_item in data:
 
             try:
-                hours_list = date_item.get('hours')
-                date_str = date_item.get('date')
+                hours_list = date_item.get("hours")
+                date_str = date_item.get("date")
             except Exception as e:
                 logger.error("Error extracting data from date item: %s", e)
-
 
             if not hours_list:
                 continue
@@ -119,24 +120,24 @@ class DataCalculationTask():
         return temperate_dict
 
     def hour_calc(self, hours_list: list) -> Tuple[List[float], int]:
-        '''
-            Рассчитывает температуру и погодные условия за каждый час
+        """
+        Рассчитывает температуру и погодные условия за каждый час
 
-            Средняя температура рассчитывается за промежуток времени
-            self.hour_from и self.hour_to, игнорируя осадки, т.к.
-            не указано в условии
+        Средняя температура рассчитывается за промежуток времени
+        self.hour_from и self.hour_to, игнорируя осадки, т.к.
+        не указано в условии
 
-            Сумма времени (часов), когда погода без осадков, рассчитывается
-            за указанный промежуток времени
+        Сумма времени (часов), когда погода без осадков, рассчитывается
+        за указанный промежуток времени
 
-            see tests/test_day_calc_temp
+        see tests/test_day_calc_temp
 
-            Params:
-            hours_list (list): Список данных по часам
+        Params:
+        hours_list (list): Список данных по часам
 
-            Returns:
-            Tuple[List[float], int]: Список температуры и сумму часов без осадков
-        '''
+        Returns:
+        Tuple[List[float], int]: Список температуры и сумму часов без осадков
+        """
 
         logger.info("Calculating statistics for hours")
 
@@ -145,12 +146,12 @@ class DataCalculationTask():
 
         for hour_item in hours_list:
 
-            current_hour = int(hour_item.get('hour'))
-            hour_temp = int(hour_item.get('temp'))
-            hour_condition = str(hour_item.get('condition'))
+            current_hour = int(hour_item.get("hour"))
+            hour_temp = int(hour_item.get("temp"))
+            hour_condition = str(hour_item.get("condition"))
 
             # Check if the current hour is within the desired range
-            if self.hour_from <= current_hour  <= self.hour_to:
+            if self.hour_from <= current_hour <= self.hour_to:
 
                 if current_hour and hour_temp:
                     temperatures.append(hour_temp)
@@ -162,7 +163,6 @@ class DataCalculationTask():
 
 
 class DataAnalyzingTask:
-
     def calc_rating(self, city_data: list[CityData]) -> list[CityData]:
         """
         Добавляет рейтинг городу
@@ -183,7 +183,7 @@ class DataAnalyzingTask:
         return sort_city_data
 
     def sort_by_temp_and_condition(self, city_data: list[CityData]) -> list[CityData]:
-        '''
+        """
         Сортирует список объектов с данными по городам по средней температуре и средней сумме часов без осадков.
         Сортировка по ср. температуре и ср. сумме дней по погодным условиям
         Большая ср. температура и большая ср. сумма погоды - выше
@@ -196,9 +196,10 @@ class DataAnalyzingTask:
         Returns:
         list[CityData]: отсортированный список объектов с данными по городам
 
-        '''
+        """
         logger.info("Sorting city data by temperature and condition")
         return sorted(city_data, key=lambda x: (-x.average_temp, -x.average_condition))
+
 
 class DataAggregationTask:
     def __init__(self) -> None:
@@ -218,7 +219,7 @@ class DataAggregationTask:
         logger.info("Running analysis on city data")
 
         if not city_data:
-            raise ValueError('CityData empty')
+            raise ValueError("CityData empty")
 
         city_with_rating_list = data_analyzing.calc_rating(city_data)
         self.best_city = city_with_rating_list[0]
@@ -254,14 +255,26 @@ class DataAggregationTask:
         """
         logger.info("Preparing data for saving to file")
 
-        dates = [date_info.date for city_data in city_data_list for date_info in city_data.dates]
+        dates = [
+            date_info.date
+            for city_data in city_data_list
+            for date_info in city_data.dates
+        ]
         dates = list(set(dates))
 
-        data = [['Город/день', ''] + dates + ['Среднее', 'Рейтинг']]
+        data = [["Город/день", ""] + dates + ["Среднее", "Рейтинг"]]
 
         for city_data in city_data_list:
-            temp_row = [city_data.city_name, 'Температура, среднее'] + [str(date.avg_temperature) for date in city_data.dates] + [str(city_data.average_temp), str(city_data.rating)]
-            cond_row = ['', 'Без осадков, часов'] + [str(date.sum_condition) for date in city_data.dates] + [str(city_data.average_condition), '']
+            temp_row = (
+                [city_data.city_name, "Температура, среднее"]
+                + [str(date.avg_temperature) for date in city_data.dates]
+                + [str(city_data.average_temp), str(city_data.rating)]
+            )
+            cond_row = (
+                ["", "Без осадков, часов"]
+                + [str(date.sum_condition) for date in city_data.dates]
+                + [str(city_data.average_condition), ""]
+            )
 
             data.append(temp_row)
             data.append(cond_row)

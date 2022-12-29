@@ -1,6 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 
+
 @dataclass
 class DateInfo:
     """
@@ -12,11 +13,13 @@ class DateInfo:
     avg_temperature: float
     sum_condition: int
 
+
 @dataclass
 class CityData:
     """
     Данные по городу
     """
+
     city_name: str
     dates: List[DateInfo]
     average_temp: float
