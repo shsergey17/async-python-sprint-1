@@ -32,7 +32,7 @@ def result(city_name: str) -> CityData:
         logger.error(f"Bad response for city: {city_name}")
         raise ValueError(f"Bad response for city: {city_name}")
 
-    return task.calc(city_name, response.get("forecasts"))
+    return task.calc(city_name, response)
 
 
 def forecast_weather(file: IFileType):

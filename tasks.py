@@ -11,7 +11,7 @@ from utils import HOUR_FROM, HOUR_TO, WEATHER_CONDITION, logger
 
 class DataFetchingTask:
     @staticmethod
-    def make_request(city_name: str) -> list:
+    def make_request(city_name: str) -> dict:
         """
         Делает запрос к API погоды Яндекса для указанного города и возвращает ответ.
 
@@ -25,7 +25,8 @@ class DataFetchingTask:
         logger.info("Making request to Yandex Weather API for city: %s", city_name)
         resp = ywAPI.get_forecasting(city_name)
         logger.debug("API response: %s", resp)
-        return resp
+
+        return resp.get("forecasts", {})
 
 
 class DataCalculationTask:
