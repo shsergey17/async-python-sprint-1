@@ -9,9 +9,14 @@ from src.file_types import IFileType
 from utils import HOUR_FROM, HOUR_TO, WEATHER_CONDITION, logger
 
 
+
+
+
 class DataFetchingTask:
-    @staticmethod
-    def make_request(city_name: str) -> dict:
+    def __init__(self, api: YandexWeatherAPI) -> None:
+        self.api = api
+
+    def make_request(self, city_name: str) -> dict:
         """
         Делает запрос к API погоды Яндекса для указанного города и возвращает ответ.
 
@@ -21,12 +26,12 @@ class DataFetchingTask:
         Returns:
         list: ответ API погоды Яндекса.
         """
-        ywAPI = YandexWeatherAPI()
         logger.info("Making request to Yandex Weather API for city: %s", city_name)
-        resp = ywAPI.get_forecasting(city_name)
+        resp = self.api.get_forecasting(city_name)
         logger.debug("API response: %s", resp)
 
         return resp.get("forecasts", {})
+
 
 
 class DataCalculationTask:
@@ -262,6 +267,7 @@ class DataAggregationTask:
             for date_info in city_data.dates
         ]
         dates = list(set(dates))
+        dates.sort()
 
         data = [["Город/день", ""] + dates + ["Среднее", "Рейтинг"]]
 

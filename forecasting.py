@@ -1,6 +1,7 @@
 import threading
 from concurrent.futures import as_completed
 from concurrent.futures import ThreadPoolExecutor
+from api_client import YandexWeatherAPI
 from src.file_types import CsvFileType, IFileType, XlsxFileType, JsonFileType
 from tasks import (
     DataFetchingTask,
@@ -23,6 +24,7 @@ def result(city_name: str) -> CityData:
     Returns:
     CityData: Объект города с данными
     """
+    fetch = DataFetchingTask(YandexWeatherAPI)
     response = DataFetchingTask.make_request(city_name)
     threadId = threading.get_native_id()
     logger.debug("Thread: %s City: %s", threadId, city_name)

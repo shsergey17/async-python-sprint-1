@@ -55,6 +55,8 @@ class JsonFileType(IFileType):
         filename = self.get_filename_with_ext(self.force_ext or self.ext)
         with open(filename, "w") as file:
             file.write(json_data)
+    
+
 
 
 class CsvFileType(IFileType):

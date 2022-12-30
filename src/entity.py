@@ -13,6 +13,7 @@ class DateInfo:
     avg_temperature: float
     sum_condition: int
 
+    
 
 @dataclass
 class CityData:
