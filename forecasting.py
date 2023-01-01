@@ -24,13 +24,13 @@ def result(city_name: str) -> CityData:
     Returns:
     CityData: Объект города с данными
     """
-    fetch = DataFetchingTask(YandexWeatherAPI)
-    response = DataFetchingTask.make_request(city_name)
+    fetch = DataFetchingTask(YandexWeatherAPI())
+    response = fetch.make_request(city_name)
     threadId = threading.get_native_id()
     logger.debug("Thread: %s City: %s", threadId, city_name)
 
     task = DataCalculationTask(HOUR_FROM, HOUR_TO, WEATHER_CONDITION)
-    if response is None or "forecasts" not in response:
+    if response is None:
         logger.error(f"Bad response for city: {city_name}")
         raise ValueError(f"Bad response for city: {city_name}")
 
@@ -62,7 +62,7 @@ def forecast_weather(file: IFileType):
 if __name__ == "__main__":
     """JsonFileType, CsvFileType, XlsxFileType"""
 
-    file = CsvFileType(filename="city")
+    file = CsvFileType(filename="city.csv")
     forecast_weather(file)
 
     # import resource

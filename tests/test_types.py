@@ -1,43 +1,64 @@
-import pytest
-from unittest.mock import Mock, patch, MagicMock, call, mock_open
-import builtins
 import sys
-
-from requests import patch
+import json
+import os
+import csv
+import openpyxl
 
 sys.path.append("../")
 
-from src.file_types import IFileType, JsonFileType
-
-def test_get_filenname():
-    json_type = JsonFileType('test')
-    assert json_type.get_filename_with_ext('json') == 'test.json'
+from src.file_types import JsonFileType, CsvFileType, XlsxFileType
 
 
+def test_json_file():
+    filename = "test_json.json"
+
+    json_type = JsonFileType(filename)
+
+    data = [["a", "b"], ["c", "d"]]
+    json_type.save(data)
+
+    with open(filename, "r") as file:
+        assert json.load(file) == data
+
+    os.remove(filename)
 
 
-@patch('builtins.open', new_callable=mock_open())
-def test_dump(self, mock_open_file, mock_os):
-    json_type = JsonFileType('test')
-    data_writer = json_type.save()
+def test_csv_file():
+    filename = "test_csv.csv"
+    json_type = CsvFileType(filename)
 
-    mock_os.path.exists.assert_called_once_with('/my/path/not/exists')
-    mock_open_file.assert_called_once_with('/my/path/not/exists/output.text', 'w+')
-    mock_open_file.return_value.__enter__().write.assert_called_once_with('Hello, Foo!')
+    data = [["a", "b"], ["c", "d"]]
+    json_type.save(data)
 
-# def test_save():
+    with open(filename, "r") as csv_file:
+        reader = csv.reader(csv_file)
+        data_list = list(reader)
+        assert data_list == data
 
-#     data = [['column1', 'column2'], ['row1_value1', 'row1_value2'], ['row2_value1', 'row2_value2']]
-#     mock_file = Mock()
-#     mock_open = Mock(return_value=mock_file)
-
-#     # Patch the built-in open function with the mock open function
-#     with patch('builtins.open', mock_open):
-#         file_type = JsonFileType()
-#         file_type.save(data)
-
-#     mock_open.assert_called_once_with(file_type.get_filename_with_ext('json'), 'w')
-#     mock_file.write.assert_called_once_with('[["column1", "column2"], ["row1_value1", "row1_value2"], ["row2_value1", "row2_value2"]]')
+    os.remove(filename)
 
 
-    
+def test_xlsx_file():
+    filename = "test_xlsx.xlsx"
+    json_type = XlsxFileType(filename)
+
+    data = [["a", "b"], ["c", "d"]]
+    json_type.save(data)
+
+    result_data = _read_excel(filename)
+
+    assert result_data == data
+
+    os.remove(filename)
+
+
+def _read_excel(filename):
+    wb = openpyxl.load_workbook(filename)
+    sheet = wb.active
+    data = []
+    for row in sheet.rows:
+        row_data = []
+        for cell in row:
+            row_data.append(cell.value)
+        data.append(row_data)
+    return data
